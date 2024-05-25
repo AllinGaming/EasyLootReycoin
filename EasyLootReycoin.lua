@@ -10,12 +10,13 @@ local auctionItem = nil
 local auctionState = "none" -- must be either "none", "link", "raid", "chunk"
 local auctionCounterInit = 11
 local arrayIndex = 1
-local updateInterval = 2 
+local updateInterval = 1 
 local lastUpdate = 0 
 local a = {}
-local memberWinnerName = ""
+local memberWinnerName = "_NO_ROLLS_"
 local memberWinnerRoll = 0
-local memberRollType = 97
+local memberRollType = 0
+local nlootText = "ROLL NOW!"
 for i=1, 50 do
 	a[i] = ""
 end
@@ -41,23 +42,23 @@ local function onUpdate()
 		if auctionState == "link" then
 			-- lua equivalent to conditional operator: IsRaidLeader() or IsRaidOfficer() ? "RAID_WARNING" : "RAID"
 			local channel = (IsRaidLeader() or IsRaidOfficer()) and "RAID_WARNING" or "RAID"
-						
-			SendChatMessage(auctionItem.."REYCOINERS /ROLL 101 NOW!", channel)
+			local countdownNum = auctionCounterInit - 1
+			SendChatMessage("ROLLING FOR: "..auctionItem..". REYCOINERS /ROLL 101 NOW! "..countdownNum.." second countdown!", channel)
 		elseif auctionState == "chunk" then
 			-- lua equivalent to conditional operator: IsRaidLeader() or IsRaidOfficer() ? "RAID_WARNING" : "RAID"
 			local channel = (IsRaidLeader() or IsRaidOfficer()) and "RAID_WARNING" or "RAID"
-					
-			SendChatMessage(auctionItem.." ROLL NOW!", channel)
+			local countdownNum = auctionCounterInit - 1
+			SendChatMessage("--- MS /roll 100 || OS /roll 99 || Tmog /roll 98 ---"..auctionItem.." ROLL NOW! "..countdownNum.." second countdown!", channel)
 		end
-	elseif auctionEnds > 0 then
+	elseif auctionEnds < 6 and auctionEnds > 0 then
 		SendChatMessage(tostring(auctionEnds), "RAID")
 	elseif auctionEnds == 0 then
 		if auctionState == "link" then
-			SendChatMessage(auctionItem.." winner "..memberWinnerName.."!", "RAID")
-			SendChatMessage(string.format("%s with a (1-%s)", memberWinnerRoll, memberRollType), "RAID")
-			memberWinnerName = ""
+			iPrint(auctionItem.." winner "..memberWinnerName.."!", "RAID")
+			iPrint(string.format("%s with a (1-%s)", memberWinnerRoll, memberRollType), "RAID")
+			memberWinnerName = "_NONE_"
 			memberWinnerRoll = 0
-			memberRollType = 97
+			memberRollType = 0
 			arrayIndex = 1
 			for k in pairs (a) do
 				a [k] = nil
@@ -66,14 +67,15 @@ local function onUpdate()
 		elseif auctionState == "chunk" then
 			SendChatMessage(auctionItem.." winner "..memberWinnerName.."!", "RAID")
 			SendChatMessage(string.format("%s with a (1-%s)", memberWinnerRoll, memberRollType), "RAID")
-			memberWinnerName = ""
+			memberWinnerName = "_NONE_"
 			memberWinnerRoll = 0
-			memberRollType = 97
+			memberRollType = 0
 			arrayIndex = 1
 			for k in pairs (a) do
 				a [k] = nil
 			end
 			auctionState = "none"
+			nlootText = "ROLL NOW!"
 		end
 	end
 
@@ -87,26 +89,15 @@ local function isempty(s)
 local function onEvent() 	
 	if event == "CHAT_MSG_SYSTEM" and auctionState == "link" then
 		local meme = string.find(arg1, "(1-101)")		
-		local memeSr = string.find(arg1, "(1-102)")		
-		local memeMs = string.find(arg1, "(1-100)")		
-		local memeOs = string.find(arg1, "(1-99)")		
-		local memeTmog = string.find(arg1, "(1-98)")
-		local rolltip = 98	
-		if memeSr ~= nil then
-			rolltip = 102
-		elseif meme ~= nil then
-			rolltip = 101
-		elseif memeMs ~= nil then
-			rolltip = 100
-		elseif memeOs ~= nil then
-			rolltip = 99
-		else 
-			if not memeTmog then iPrint("random string here"); return end
-		end
+		local rolltip = 101	
+		local startIndex,_,roll = string.find(arg1, " rolls (.+)% [(][0-9]+-[0-9]+[)]")
+		local memberName = string.sub(arg1, 1, startIndex)
+		if not meme then iPrint(memberName.." WRONG ROLL TYPE, /ROLL 101!") return end
+
 		local startIndex,_,roll = string.find(arg1, " rolls (.+)% [(][0-9]+-[0-9]+[)]")
 		local memberName = string.sub(arg1, 1, startIndex)
 		if has_value(a, memberName) then 
-			SendChatMessage(memberName.." IS DOUBLE DIPPING!", "RAID")
+			iPrint(memberName.." rolled again. REROLL IGNORED!")
 			return
 		end
 		a[arrayIndex] = memberName
@@ -146,7 +137,7 @@ local function onEvent()
 		local startIndex,_,roll = string.find(arg1, " rolls (.+)% [(][0-9]+-[0-9]+[)]")
 		local memberName = string.sub(arg1, 1, startIndex)
 		if has_value(a, memberName) then 
-			SendChatMessage(memberName.." IS DOUBLE DIPPING!", "RAID")
+			SendChatMessage(memberName.." rolled again. REROLL IGNORED!", "RAID")
 			return
 		end
 		a[arrayIndex] = memberName
@@ -205,6 +196,27 @@ end
 SLASH_REY1 = '/reycoin'
 function SlashCmdList.REY(msg, editbox)	
 	start(msg, "link")
+end
+
+SLASH_NLOOTMSG1 = '/nlootmsg'
+function SlashCmdList.NLOOT(msg, editbox)	
+	nlootText = msg
+end
+
+SLASH_MANUALEND1 = '/nend'
+function SlashCmdList.MANUALEND(msg, editbox)	
+	iPrint(" winner "..memberWinnerName.."!", "RAID")
+	iPrint(string.format("%s with a (1-%s)", memberWinnerRoll, memberRollType), "RAID")
+	auctionEnds = -1
+	memberWinnerName = "_NONE_"
+	memberWinnerRoll = 0
+	memberRollType = 0
+	arrayIndex = 1
+	for k in pairs (a) do
+		a [k] = nil
+	end
+	auctionState = "none"
+	nlootText = "ROLL NOW!"
 end
 
 SLASH_SOMR1 = '/rollrules'
