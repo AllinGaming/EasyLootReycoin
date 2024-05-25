@@ -16,7 +16,7 @@ Loot Addon Commands:
 
 - ```/rr [itemlink]``` - Randomly rolls an item and displays the winner's name in raid chat. (You manually have to send the item.)
 
-========
+
 TODO:
 - IMPLEMENT GUI WITH COIN OWNER LIST (EASY EDIT)
 - REMOVE FROM CURRENT LIST ON ROLL WIN
