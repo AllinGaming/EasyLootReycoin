@@ -13,7 +13,7 @@ local arrayIndex = 1
 local updateInterval = 1 
 local lastUpdate = 0 
 local a = {}
-local memberWinnerName = "_NO_ROLLS_"
+local memberWinnerName = "_NONE_"
 local memberWinnerRoll = 0
 local memberRollType = 0
 local nlootText = "ROLL NOW!"
@@ -54,6 +54,7 @@ local function onUpdate()
 		SendChatMessage(tostring(auctionEnds), "RAID")
 	elseif auctionEnds == 0 then
 		if auctionState == "link" then
+			SendChatMessage("Reycoin rolling ended.", "RAID")
 			iPrint(auctionItem.." winner "..memberWinnerName.."!", "RAID")
 			iPrint(string.format("%s with a (1-%s)", memberWinnerRoll, memberRollType), "RAID")
 			memberWinnerName = "_NONE_"
@@ -65,8 +66,21 @@ local function onUpdate()
 			end
 			auctionState = "none"
 		elseif auctionState == "chunk" then
-			SendChatMessage(auctionItem.." winner "..memberWinnerName.."!", "RAID")
-			SendChatMessage(string.format("%s with a (1-%s)", memberWinnerRoll, memberRollType), "RAID")
+			local rollTypeText = "_NONE_"
+			if memberRollType == 98 then
+				rollTypeText = "TMOG"
+			elseif memberRollType == 99 then
+				rollTypeText = "OS"
+			elseif memberRollType == 100 then
+				rollTypeText = "MS"
+			elseif memberRollType == 102 then
+				rollTypeText = "SR"
+			end
+			if rollTypeText == "_NONE_" then
+				SendChatMessage(auctionItem.." DISENCHANT.", "RAID")
+			else
+				SendChatMessage(auctionItem.." winner "..memberWinnerName.."with a "..rollTypeText.." roll of "..memberWinnerRoll.."!", "RAID")				
+			end
 			memberWinnerName = "_NONE_"
 			memberWinnerRoll = 0
 			memberRollType = 0
