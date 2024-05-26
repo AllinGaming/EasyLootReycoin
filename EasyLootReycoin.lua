@@ -131,11 +131,11 @@ local function onEvent()
 			memberRollType = rolltip
 		end
 	elseif event == "CHAT_MSG_SYSTEM" and auctionState == "chunk" then
-		local meme = string.find(arg1, "(1-101)")		
-		local memeSr = string.find(arg1, "(1-102)")		
-		local memeMs = string.find(arg1, "(1-100)")		
-		local memeOs = string.find(arg1, "(1-99)")		
-		local memeTmog = string.find(arg1, "(1-98)")
+		local meme = string.find(arg1, "%(1%-101%)")		
+		local memeSr = string.find(arg1, "%(1%-102%)")		
+		local memeMs = string.find(arg1, "%(1%-100%)")
+		local memeOs = string.find(arg1, "%(1%-99%)")		
+		local memeTmog = string.find(arg1, "%(1%-98%)")
 		local rolltip = 97	
 		if memeSr ~= nil then
 			iPrint(arg1.." WRONG ROLL")
@@ -150,7 +150,7 @@ local function onEvent()
 		elseif memeTmog ~= nil then
 			rolltip = 98
 		else 
-			iPrint("BAD STRING")
+			iPrint("INVALID ROLL")
 			return
 		end
 		local startIndex,_,roll = string.find(arg1, " rolls (.+)% [(][0-9]+-[0-9]+[)]")
