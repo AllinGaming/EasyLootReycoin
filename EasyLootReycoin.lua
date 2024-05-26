@@ -1,7 +1,7 @@
 local f = CreateFrame("frame")
 f:RegisterEvent("CHAT_MSG_SYSTEM")
 local function iPrint(msg)
-	DEFAULT_CHAT_FRAME:AddMessage(tostring(msg), 1, 0, 0)
+	DEFAULT_CHAT_FRAME:AddMessage("|cffd5a6bd[SoM] |cff52b627" ..msg, 1, 0, 0)
 end
 
 local gfind = string.gmatch or string.gfind
@@ -55,8 +55,7 @@ local function onUpdate()
 	elseif auctionEnds == 0 then
 		if auctionState == "link" then
 			SendChatMessage("Reycoin rolling ended.", "RAID")
-			iPrint(auctionItem.." winner "..memberWinnerName.."!", "RAID")
-			iPrint(string.format("%s with a (1-%s)", memberWinnerRoll, memberRollType), "RAID")
+			iPrint(auctionItem..string.format(" |cff52b627winner |cffef6dac%s|cff52b627rolled |cffffffff%s |cff52b627with a |cffffffff(1-%s)!", memberWinnerName, memberWinnerRoll, memberRollType))
 			memberWinnerName = "_NONE_"
 			memberWinnerRoll = 0
 			memberRollType = 0
@@ -102,11 +101,11 @@ local function isempty(s)
 
 local function onEvent() 	
 	if event == "CHAT_MSG_SYSTEM" and auctionState == "link" then
-		local meme = string.find(arg1, "(1-101)")		
+		local meme = string.find(arg1, "%(1%-101%)")		
 		local rolltip = 101	
 		local startIndex,_,roll = string.find(arg1, " rolls (.+)% [(][0-9]+-[0-9]+[)]")
 		local memberName = string.sub(arg1, 1, startIndex)
-		if not meme then iPrint(memberName.." WRONG ROLL TYPE, /ROLL 101!") return end
+		if not meme then iPrint(memberName.." WRONG ROLL TYPE, PLEASE /ROLL 101!") return end
 
 		local startIndex,_,roll = string.find(arg1, " rolls (.+)% [(][0-9]+-[0-9]+[)]")
 		local memberName = string.sub(arg1, 1, startIndex)
@@ -196,7 +195,6 @@ local function start(msg, state)
 		local command
 		for command in gfind(msg, "[^_]+") do
 			table.insert(commandlist, command)
-			iPrint(command)
 		end
 		auctionItem = commandlist[1]
 		auctionCounterInit = tonumber(commandlist[2]) + 1
@@ -224,8 +222,8 @@ end
 
 SLASH_MANUALEND1 = '/nend'
 function SlashCmdList.MANUALEND(msg, editbox)	
-	iPrint(" winner "..memberWinnerName.."!", "RAID")
-	iPrint(string.format("%s with a (1-%s)", memberWinnerRoll, memberRollType), "RAID")
+	iPrint(" winner "..memberWinnerName.."!")
+	iPrint(string.format("%s with a (1-%s)", memberWinnerRoll, memberRollType))
 	auctionEnds = -1
 	memberWinnerName = "_NONE_"
 	memberWinnerRoll = 0
