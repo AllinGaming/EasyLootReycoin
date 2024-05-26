@@ -1,5 +1,6 @@
 local f = CreateFrame("frame")
 f:RegisterEvent("CHAT_MSG_SYSTEM")
+f:RegisterEvent("LOOT_OPENED")
 local function iPrint(msg)
 	DEFAULT_CHAT_FRAME:AddMessage("|cffd5a6bd[SoM] |cff52b627" ..msg, 1, 0, 0)
 end
@@ -13,6 +14,8 @@ local arrayIndex = 1
 local updateInterval = 1 
 local lastUpdate = 0 
 local a = {}
+local LT_PendingLootBySlot = {}
+local LT_PendingLoot = {}
 local memberWinnerName = "_NONE_"
 local memberWinnerRoll = 0
 local memberRollType = 0
@@ -99,7 +102,104 @@ local function isempty(s)
 	return s == nil
   end
 
+function LT_OnLootBegin()
+
+    LT_PendingLootBySlot = {};
+
+    -- Determine the target being looted
+    local source = UnitName("target");
+    
+    if (source == nil) then
+        iPrint("Looting (Unknown)");
+    else
+		iPrint("Looting ".. source);
+    end
+    
+    local lootCount = GetNumLootItems();
+    
+    for slot = 1, lootCount, 1 do
+		-- iPrint(slot.. " Loot ".. source);
+        -- Create a pending loot entry
+		LT_CreatePendingLoot(slot, source);
+    end
+	local concated = source.." drops:"
+	local first = 0
+	for i in pairs(LT_PendingLoot) do
+		if (first == 0) then
+			SendChatMessage(concated, "RAID")
+			first = 1
+		end
+        iPrint(LT_PendingLoot[i].Name)
+		SendChatMessage(i, "RAID")
+		-- concated = string.format("%s %s,", concated, i)
+    end
+	LT_PendingLoot = {}
+end
+function LT_IsMoneyString(text)
+
+    local value = LT_ParseMoney(text);
+
+    if (value ~= 0) then
+        return true;
+    else
+        return false;
+    end
+
+end
+
+function LT_CreatePendingLoot(slot, source)
+    -- Obtain the loot slot data from the WoW APIs
+    local link = GetLootSlotLink(slot);
+    local lootIcon, lootName, lootQuantity, lootQuality = GetLootSlotInfo(slot);
+    -- Create the loot item
+    local loot      = {};
+    loot.Name       = lootName;
+    loot.Source     = source;
+    loot.LootLink     = sLink;
+    
+	if (lootQuality < 3) then
+		return 
+	end
+    if ((lootQuantity ~= nil) and (lootQuantity > 1)) then
+        loot.Quantity = lootQuantity;
+    end
+    
+    -- -- If this is a money drop, set the Name to "Money"
+    -- if (LT_IsMoneyString(lootName)) then
+    --     iPrint("Detected a money drop");
+    --     loot.Name = LT_MONEY;
+    --     loot.Value = LT_ParseMoney(lootName);
+    -- end
+    
+    -- Trace out the state
+    -- iPrint("Created pending loot: " .. lootName);	    
+
+    -- Store the loot in the slot indexed data store
+    if (LT_PendingLootBySlot == nil) then
+        LT_PendingLootBySlot = {}
+    end
+    LT_PendingLootBySlot[slot] = loot;
+	-- iPrint(string.format(LT_PendingLootBySlot[slot].Name))
+    -- Store the loot in the general data store
+    -- local pendingLoot = LT_GetPendingLoot();
+    LT_PendingLoot[loot.Name] = loot
+	iPrint(string.format(LT_PendingLoot[loot.Name].Name))
+    -- return loot;
+end
+function LT_GetPendingLoot()
+
+    if (LT_PendingLoot == nil) then
+        LT_PendingLoot = {};
+    end
+        
+    return LT_PendingLoot;
+
+end
 local function onEvent() 	
+	if (event == "LOOT_OPENED") then
+        LT_OnLootBegin();
+        return;        
+    end
 	if event == "CHAT_MSG_SYSTEM" and auctionState == "link" then
 		local meme = string.find(arg1, "%(1%-101%)")		
 		local rolltip = 101	
