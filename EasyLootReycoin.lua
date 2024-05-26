@@ -55,7 +55,7 @@ local function onUpdate()
 	elseif auctionEnds == 0 then
 		if auctionState == "link" then
 			SendChatMessage("Reycoin rolling ended.", "RAID")
-			iPrint(auctionItem..string.format(" |cff52b627winner |cffef6dac%s|cff52b627rolled |cffffffff%s |cff52b627with a |cffffffff(1-%s)!", memberWinnerName, memberWinnerRoll, memberRollType))
+			iPrint(auctionItem..string.format(" |cff52b627winner |cffef6dac%s|cff52b627 rolled |cffffffff%s |cff52b627with a |cffffffff(1-%s)!", memberWinnerName, memberWinnerRoll, memberRollType))
 			memberWinnerName = "_NONE_"
 			memberWinnerRoll = 0
 			memberRollType = 0
@@ -107,8 +107,6 @@ local function onEvent()
 		local memberName = string.sub(arg1, 1, startIndex)
 		if not meme then iPrint(memberName.." WRONG ROLL TYPE, PLEASE /ROLL 101!") return end
 
-		local startIndex,_,roll = string.find(arg1, " rolls (.+)% [(][0-9]+-[0-9]+[)]")
-		local memberName = string.sub(arg1, 1, startIndex)
 		if has_value(a, memberName) then 
 			iPrint(memberName.." rolled again. REROLL IGNORED!")
 			return
@@ -121,7 +119,7 @@ local function onEvent()
 				memberWinnerName = memberName
 				memberRollType = rolltip
 			elseif tonumber(roll) == memberWinnerRoll then
-				SendChatMessage(memberName.." TIED WITH"..memberWinnerName..". Rolled:"..memberWinnerRoll, "RAID")
+				SendChatMessage(memberName.." tied with "..memberWinnerName..". Rolled:"..memberWinnerRoll, "RAID")
 			end
 		end
 		if rolltip > memberRollType then
@@ -166,7 +164,7 @@ local function onEvent()
 				memberWinnerName = memberName
 				memberRollType = rolltip
 			elseif tonumber(roll) == memberWinnerRoll then
-				SendChatMessage(memberName.." TIED WITH"..memberWinnerName..". Rolled:"..memberWinnerRoll, "RAID")
+				SendChatMessage(memberName.." tied with "..memberWinnerName..". Rolled:"..memberWinnerRoll, "RAID")
 			end
 		end
 		if rolltip > memberRollType then
