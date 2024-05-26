@@ -136,17 +136,22 @@ local function onEvent()
 		local memeMs = string.find(arg1, "(1-100)")		
 		local memeOs = string.find(arg1, "(1-99)")		
 		local memeTmog = string.find(arg1, "(1-98)")
-		local rolltip = 98	
+		local rolltip = 97	
 		if memeSr ~= nil then
-			rolltip = 102
+			iPrint(arg1.." WRONG ROLL")
+			return
 		elseif meme ~= nil then
-			rolltip = 101
+			iPrint(arg1.." WRONG ROLL")
+			return
 		elseif memeMs ~= nil then
 			rolltip = 100
 		elseif memeOs ~= nil then
 			rolltip = 99
+		elseif memeTmog ~= nil then
+			rolltip = 98
 		else 
-			if not memeTmog then iPrint("random string here"); return end
+			iPrint("BAD STRING")
+			return
 		end
 		local startIndex,_,roll = string.find(arg1, " rolls (.+)% [(][0-9]+-[0-9]+[)]")
 		local memberName = string.sub(arg1, 1, startIndex)
